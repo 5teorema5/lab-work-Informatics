@@ -34,7 +34,6 @@ void sort_p (int* array, int n) {
 };
 
 void sort_v (int* array, int n) {
-    int r = 1;
     ofstream g("1-2.csv", ios::app);
     int time_0 = get_time();
     for (int i = 0; i < n; i++) {
@@ -52,7 +51,6 @@ void sort_v (int* array, int n) {
 };
 
 void sort_vst (int* array, int n) {
-    int r = 1;
     ofstream h("1-3.csv", ios::app);
     int time_0 = get_time();
     for (int i = 1; i < n; i++) {
@@ -98,8 +96,8 @@ int main() {
     ofstream g("1-2.csv", ios::out);
     ofstream h("1-3.csv", ios::out);
     ofstream t("1-4.csv", ios::out);
-    int array[100000] = {0};
-    for (int n = 1; n < 100000; n+=1000) {
+    int array[10000] = {0};
+    for (int n = 10000; n < 10000; n*=1.3) {
         for (int i = 0; i < n; i++) {
             array[i] = rand_uns(-1000, 1000);
         }
