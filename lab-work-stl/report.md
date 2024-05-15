@@ -22,6 +22,6 @@
   }
   ```
 
-![capacity_size]()
+![capacity_size](./img/image0.png)
   
 </details>
