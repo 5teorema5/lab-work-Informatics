@@ -38,156 +38,6 @@
 
 Напишем свой `subvector`, помимо прочих методов, реализуем нужный нам метод `insert` - добавление элемента на конкретную позицию.
 
-<details>
-  <summary>"subvector.h"</summary>
-
-```C++
-#ifndef LAB_WORK_STL_SUBVECTOR_H
-#define LAB_WORK_STL_SUBVECTOR_H
-
-
-class Subvector {
-public:
-    // инициализация пустого недовектора (top и capacity по нулям, а mas это NULL)
-    Subvector();
-
-    // добавление элемента в конец недовектора с выделением дополнительной памяти при необходимости
-    bool push_back(int d);
-
-    // удаление элемента с конца недовектора, значение удаленного элемента вернуть (если недовектор пустой, вернуть ноль)
-    int pop_back();
-
-    // увеличить емкость недовектора (можно использовать и для уменьшения - тогда, в рамках данной реализации, если top
-    //больше новой capacity, то копируем только то, что влезает, и уменьшаем top до capacity)
-    bool resize(unsigned int new_capacity);
-
-    // очистить неиспользуемую память, переехав на новое место с уменьшением capacity до top
-    void shrink_to_fit();
-
-    // очистить содержимое недовектора, занимаемое место при этом не меняется
-    void clear();
-
-    // очистить всю используемую память, инициализировать недовектор как пустой
-    void destructor();
-
-    //добавление элемента в конкретное место вектора
-    void insert(int pos, int value);
-
-    //вывод top
-    unsigned int getTop() const;
-
-    //вывод capacity
-    unsigned int getCapacity() const;
-
-    //вывод вектора
-    void print();
-
-private:
-    int *mas;
-    unsigned int top;
-    unsigned int capacity;
-};
-
-
-#endif //LAB_WORK_STL_SUBVECTOR_H
-```
-
-</details>
-
-<details>
-  <summary>"subvector.cpp"</summary>
-
-```C++
-#include <iostream>
-#include "subvector.h"
-
-Subvector::Subvector() {
-    this->capacity = 0;
-    this->top = 0;
-    this->mas = NULL;
-};
-
-bool Subvector::push_back(int d) {
-    if (this->top + 1 > this->capacity) {
-        this->resize(this->top * 2 + 1);
-    }
-    (this->mas)[this->top] = d;
-    (this->top)++;
-    return true;
-};
-
-int Subvector::pop_back() {
-    if (this->top == 0) return 0;
-    (this->top)--;
-    return (this->mas)[this->top];
-};
-
-bool Subvector::resize(unsigned int new_capacity) {
-    this->capacity = new_capacity;
-    int *tmp = new int[new_capacity];
-    if (this->top > new_capacity) {
-        this->top = new_capacity;
-    }
-    for (unsigned int i = 0; i < this->top; i++) {
-        tmp[i] = (this->mas)[i];
-    }
-    delete[] this->mas;
-    this->mas = tmp;
-    return true;
-};
-
-void Subvector::shrink_to_fit() {
-    this->capacity = this->top;
-    int *tmp = new int[this->top];
-    for (unsigned int i = 0; i < this->top; i++) {
-        tmp[i] = (this->mas)[i];
-    }
-    delete[] this->mas;
-    this->mas = tmp;
-};
-
-void Subvector::clear() {
-    this->top = 0;
-};
-
-void Subvector::destructor() {
-    delete[] this->mas;
-    Subvector();
-};
-
-void Subvector::insert(int pos, int value) {
-    if (this->top > this->capacity) {
-        this->resize(this->top * 2 + 1);
-    }
-    for (unsigned int i = this->top - 1; i > pos; i--) {
-        this->mas[i + 1] = this->mas[i];
-    }
-    this->mas[pos + 1] = this->mas[pos];
-    this->top++;
-    this->mas[pos] = value;
-}
-
-unsigned int Subvector::getTop() const {
-    return this->top;
-}
-
-unsigned int Subvector::getCapacity() const {
-    return this->capacity;
-}
-
-void Subvector::print() {
-    for (unsigned int i = 0; i < this->top; i++) {
-        std::cout << this->mas[i] << ' ';
-    }
-    std::cout << '\n';
-}
-
-```
-</details>
-
-<details>
-  <summary>(отдельно) Subvector::insert() {}</summary>
-
 ```C++
 void Subvector::insert(int pos, int value) {
     if (this->top > this->capacity) {
@@ -201,9 +51,8 @@ void Subvector::insert(int pos, int value) {
     this->mas[pos] = value;
 }
 ```
-</details>
 
-Будем тестировать наш метод `insert` для нашего `subvector`, а так же стандартный `insert` для `std::vector`. Будем засекать время работы этих методов, а потом строить график зависимости времени выполнения от размера вектора/сабвектора.
+Будем тестировать наш метод `insert` для нашего `subvector`, а так же стандартный `insert` для `std::vector`. Для этого будем добавлять элемент, стая его на первое (нулевое) место, а так же будем засекать время работы этих методов, а потом строить график зависимости времени выполнения от размера вектора/сабвектора.
 
 <details>
   <summary>"task1.cpp"</summary>
@@ -264,9 +113,106 @@ int main() {
 </details>
 
 Итак, график для `subvector`:
+
 ![capacity_size](./img/image1.png)
 
-Итак, график для `std::vector`:
+Можем точно сказать, что ассимптотика нашего метода `insert` равна **O(N)**. Это и очевидно, поскольку для того, чтобы добавить элемент, нам нужно передвинуть весь сабвектор на одну позицию.
+
+И график для `std::vector`:
+
 ![capacity_size](./img/image2.png)
+
+Здесь так же ассимптотика составляет **O(N)**. Мы так же можем наблюдать некоторый излом - это происходит из-за больших данных. В общей картине - ничего не меняется.
+  
+</details>
+
+
+<details>
+  <summary><h3>3. Среднее время удаления одного элемента из произвольного места вектора</h3></summary>
+
+Дополним предыдущий вектор, реализовав нужный нам метод `erase` - удаление элемента из конкретной позиции.
+
+```C++
+void Subvector::erase(int pos) {
+    for (unsigned int i = pos; i < this->getTop() - 1; i++) {
+        this->mas[i] = this->mas[i+1];
+    }
+    this->top--;
+}
+```
+
+Будем тестировать наш метод `erase` для нашего `subvector`, а так же стандартный `erase` для `std::vector`. Для этого сначала заполним наши контейнера набором одинаковых чисел, а затем будем постепенно удалять первый (нулевой) элемент. Во время использования метода будем засекать время, а затем построим график зависимости времени выполнения от размера вектора/сабвектора.
+
+<details>
+  <summary>"task1.cpp"</summary>
+
+```C++
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <random>
+#include <chrono>
+#include "subvector.h"
+
+double get_time() {
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count() / 1e6;
+}
+
+int rand_uns(int min, int max) {
+    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
+    static std::default_random_engine e(seed);
+    std::uniform_int_distribution<int> d(min, max);
+    return d(e);
+}
+
+int main() {
+    std::ofstream f1("../2_1.csv", std::ios::out);
+    std::ofstream f2("../2_2.csv", std::ios::out);
+
+    Subvector subv;
+    std::vector<int> v;
+    for (int i = 0; i < 262144; i++) {
+        int value = rand_uns(0, 100);
+        subv.push_back(value);
+        v.push_back(value);
+    }
+    for (int i = 0; i < 262144; i++) {
+        std::cout << i << '\n';
+        if (i % 1000 != 0) {
+            subv.erase(0);
+            v.erase(v.begin());
+        }
+        else if (i % 1000 == 0) {
+            auto start = get_time();
+            subv.erase(0);
+            auto finish = get_time();
+            auto time = finish - start;
+            f1 << subv.getTop() << " " << time << "\n";
+
+            start = get_time();
+            v.erase(v.begin());
+            finish = get_time();
+            time = finish - start;
+            f2 << v.size()<< " " << time << "\n";
+        }
+    }
+
+    return 0;
+}
+```
+</details>
+
+Итак, график для `subvector`:
+
+![capacity_size](./img/image3.png)
+
+Можем точно сказать, что ассимптотика нашего метода `erase` равна **O(N)**. Это и очевидно, поскольку для того, чтобы удалить элемент, нам нужно передвинуть весь сабвектор на одну позицию.
+
+И график для `std::vector`:
+
+![capacity_size](./img/image4.png)
+
+Здесь так же ассимптотика составляет **O(N)**. Мы так же можем наблюдать некоторый излом - это происходит из-за больших данных. В общей картине - опять же ничего не меняется.
   
 </details>
