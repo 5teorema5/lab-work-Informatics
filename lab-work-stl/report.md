@@ -612,3 +612,17 @@ int main() {
 
   
 </details>
+
+<details>
+  <summary><h3>6. Среднее время обхода всего контейнера</h3></summary>
+
+
+  
+</details>
+
+<details>
+  <summary><h3>7. Среднее время доступа к произвольному элементу (random access) вектора</h3></summary>
+
+
+  
+</details>
