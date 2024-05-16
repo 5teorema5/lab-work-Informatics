@@ -144,7 +144,7 @@ void Subvector::erase(int pos) {
 Будем тестировать наш метод `erase` для нашего `subvector`, а так же стандартный `erase` для `std::vector`. Для этого сначала заполним наши контейнера набором одинаковых чисел, а затем будем постепенно удалять первый (нулевой) элемент. Во время использования метода будем засекать время, а затем построим график зависимости времени выполнения от размера вектора/сабвектора.
 
 <details>
-  <summary>"task1.cpp"</summary>
+  <summary>"task2.cpp"</summary>
 
 ```C++
 #include <iostream>
@@ -222,6 +222,105 @@ int main() {
 
 Будем тестировать односвязные списки, такие как `list`, `forward_list` и написанный нами `subforwardlist`. А точнее будем тестировать их метод `push_front`: будем последовательно добавлять в контейнер элементы и записывать время работы метода. Затем построим график зависимости времени работы метода в зависимости от размера контейнера.
 
+<details>
+  <summary>"task3.cpp"</summary>
+
+```C++
+#include <iostream>
+#include <list>
+#include <forward_list>
+#include <fstream>
+#include <random>
+#include <chrono>
+
+struct subforwardlist {
+    int data;
+    subforwardlist* next;
+};
+
+bool init(subforwardlist **sfl) {
+    *sfl = NULL;
+    return 0;
+}
+
+void push_forward(subforwardlist **sfl, int d) {
+    subforwardlist* start = new subforwardlist();
+    start->data = d;
+    start->next = (*sfl);
+    (*sfl) = start;
+}
+
+void pop_forward(subforwardlist **sfl) {
+    if (  *sfl  ) {
+        subforwardlist *p = (*sfl)->next;
+        delete *sfl;
+        (*sfl) = p;
+    }
+}
+
+void clear(subforwardlist **sfl) {
+    if (  !(*sfl)  ) return;
+    while (*sfl) {
+        pop_forward(sfl);
+    }
+    (*sfl) = NULL;
+}
+
+double get_time() {
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count() / 1e6;
+}
+
+int rand_uns(int min, int max) {
+    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
+    static std::default_random_engine e(seed);
+    std::uniform_int_distribution<int> d(min, max);
+    return d(e);
+}
+
+int main() {
+    std::ofstream f1("../3_1.csv", std::ios::out);
+    std::ofstream f2("../3_2.csv", std::ios::out);
+    std::ofstream f3("../3_3.csv", std::ios::out);
+
+    std::list<int> l;
+    std::forward_list<int> fl;
+    subforwardlist *sfl;
+    init(&sfl);
+    for (int i = 0; i < 16777216; i++) {
+        int value = rand_uns(0, 100);
+        l.push_front(value);
+        fl.push_front(value);
+        push_forward(&sfl, value);
+        if (i % 1000 == 0) {
+            int new_value = rand_uns(0, 100);
+
+            auto start = get_time();
+            l.push_front(new_value);
+            auto finish = get_time();
+            auto time = finish - start;
+            f1 << l.size() << " " << time << "\n";
+
+            start = get_time();
+            fl.push_front(new_value);
+            finish = get_time();
+            time = finish - start;
+            f2 <<  i + i/1000 << " " << time << "\n";
+
+            start = get_time();
+            push_forward(&sfl, new_value);
+            finish = get_time();
+            time = finish - start;
+            f3 << i + i/1000 << " " << time << "\n";
+        }
+    }
+
+    clear(&sfl);
+    return 0;
+}
+```
+</details>
+
 График для `std::list`:
 
 ![capacity_size](./img/image5.png)
@@ -251,16 +350,265 @@ P.s.: для `subforwardlist` я не применял методы ООП, по
 
 Продолжим тестировать `list`, `forward_list` и написанный нами `subforwardlist`. Теперь будем тестировать их метод `pop_front`: сначала заполним их одинаковыми элементами, а затем будем последовательно удалять из контейнера элементы и записывать время работы метода. Затем построим график зависимости времени работы метода в зависимости от размера контейнера.
 
+<details>
+<summary>"task4.cpp"</summary>
+
+```C++
+#include <iostream>
+#include <list>
+#include <forward_list>
+#include <fstream>
+#include <random>
+#include <chrono>
+
+struct subforwardlist {
+    int data;
+    subforwardlist* next;
+};
+
+bool init(subforwardlist **sfl) {
+    *sfl = NULL;
+    return 0;
+}
+
+void push_forward(subforwardlist **sfl, int d) {
+    subforwardlist* start = new subforwardlist();
+    start->data = d;
+    start->next = (*sfl);
+    (*sfl) = start;
+}
+
+void pop_forward(subforwardlist **sfl) {
+    if (  *sfl  ) {
+        subforwardlist *p = (*sfl)->next;
+        delete *sfl;
+        (*sfl) = p;
+    }
+}
+
+void clear(subforwardlist **sfl) {
+    if (  !(*sfl)  ) return;
+    while (*sfl) {
+        pop_forward(sfl);
+    }
+    (*sfl) = NULL;
+}
+
+double get_time() {
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count() / 1e6;
+}
+
+int rand_uns(int min, int max) {
+    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
+    static std::default_random_engine e(seed);
+    std::uniform_int_distribution<int> d(min, max);
+    return d(e);
+}
+
+int main() {
+    std::ofstream f1("../3_1.csv", std::ios::out);
+    std::ofstream f2("../3_2.csv", std::ios::out);
+    std::ofstream f3("../3_3.csv", std::ios::out);
+
+    std::list<int> l;
+    std::forward_list<int> fl;
+    subforwardlist *sfl;
+    init(&sfl);
+    for (int i = 0; i < 16777216; i++) {
+        int value = rand_uns(0, 100);
+        l.push_front(value);
+        fl.push_front(value);
+        push_forward(&sfl, value);
+        if (i % 1000 == 0) {
+            int new_value = rand_uns(0, 100);
+
+            auto start = get_time();
+            l.push_front(new_value);
+            auto finish = get_time();
+            auto time = finish - start;
+            f1 << l.size() << " " << time << "\n";
+
+            start = get_time();
+            fl.push_front(new_value);
+            finish = get_time();
+            time = finish - start;
+            f2 <<  i + i/1000 << " " << time << "\n";
+
+            start = get_time();
+            push_forward(&sfl, new_value);
+            finish = get_time();
+            time = finish - start;
+            f3 << i + i/1000 << " " << time << "\n";
+        }
+    }
+
+    clear(&sfl);
+    return 0;
+}
+```
+</details>
+
 График для `std::list`:
 
 ![capacity_size](./img/image8.png)
+
+Из графика можем определить ассимптотику - **O(1)**. Действительно, для работы этого метода необходимо просто переставить указатель на первую (нулевую) ячейку, а исходно первую (нулевую) ячейку очистить при необходимости.
 
 График для `std::forward_list`:
 
 ![capacity_size](./img/image9.png)
 
+Аналогично, ассимптотика **O(1)**. Соображения те же самые.
+
 И график для `std::subforwardlist`:
 
 ![capacity_size](./img/image10.png)
+
+Аналогично, ассимптотика **O(1)**. Соображения те же самые.
+
+P.s.: здесь уже квантование выражено ярче, но исправлять не буду - ассимптотика проследивается сразу. Это не страшно, ассимптотику это не меняет. Чтобы от этого избавиться, необходимо усреднять значения.
+
+P.s.: для `subforwardlist` я не применял методы ООП, пользовался структурой и функциями для неё.
+  
+</details>
+
+<details>
+  <summary><h3>5. Среднее время добавления элемента в бинарное дерево</h3></summary>
+
+Будем тестировать контейнеры, основанные на работе бинарного дерева. Это `set`, `map`, 'multiset` и 'multimap`. Здесь квантование выражено сильнее, поэтому усреднять точно надо. Будет поочерёдно для каждого контейнера добавлять элементы, через каждую 1000 элементов фиксировать среднее время работы метода `insert`. Далее строим графики зависимости времени работы этого метода от размера контейнера.
+
+<details>
+  <summary>"task5.cpp"</summary>
+
+```C++
+#include <iostream>
+#include <set>
+#include <map>
+#include <fstream>
+#include <random>
+#include <chrono>
+
+double get_time() {
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count() / 1e6;
+}
+
+int rand_uns(int min, int max) {
+    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
+    static std::default_random_engine e(seed);
+    std::uniform_int_distribution<int> d(min, max);
+    return d(e);
+}
+
+int main() {
+    std::ofstream f1("../5_1.csv", std::ios::out);
+    std::ofstream f2("../5_2.csv", std::ios::out);
+    std::ofstream f3("../5_3.csv", std::ios::out);
+    std::ofstream f4("../5_4.csv", std::ios::out);
+
+    std::set<int> s;
+    std::map<int, int> m;
+    std::multiset<int> ms;
+    std::multimap<int, int> mm;
+
+    bool record = false;
+    auto start = get_time();
+    for (int i = 0; i < 16777216; i++) {
+        if (!record) {
+            start = get_time();
+            record = true;
+        }
+        s.insert(i);
+        if (i != 0 and i % 10000 == 0) {
+            auto finish = get_time();
+            auto time = (finish - start) / 10000;
+
+            f1 << s.size() << " " << time << "\n";
+            record = false;
+        }
+    }
+
+    record = false;
+    start = get_time();
+    for (int i = 0; i < 16777216; i++) {
+        if (!record) {
+            start = get_time();
+            record = true;
+        }
+        m.insert({i, i});
+        if (i != 0 and i % 10000 == 0) {
+            auto finish = get_time();
+            auto time = (finish - start) / 10000;
+
+            f2 << m.size() << " " << time << "\n";
+            record = false;
+        }
+    }
+
+    record = false;
+    start = get_time();
+    for (int i = 0; i < 16777216; i++) {
+        if (!record) {
+            start = get_time();
+            record = true;
+        }
+        ms.insert(i);
+        if (i != 0 and i % 10000 == 0) {
+            auto finish = get_time();
+            auto time = (finish - start) / 10000;
+
+            f3 << ms.size() << " " << time << "\n";
+            record = false;
+        }
+    }
+
+    record = false;
+    start = get_time();
+    for (int i = 0; i < 16777216; i++) {
+        if (!record) {
+            start = get_time();
+            record = true;
+        }
+        mm.insert({i, i});
+        if (i != 0 and i % 10000 == 0) {
+            auto finish = get_time();
+            auto time = (finish - start) / 10000;
+
+            f4 << mm.size() << " " << time << "\n";
+            record = false;
+        }
+    }
+
+    return 0;
+}
+
+```
+</details>
+
+График для `std::set`:
+
+![capacity_size](./img/image11.png)
+
+Из графика прослеживается ассимптотика **O(logN)**. Это мы и ожидали, потому что бинарное дерево работает на основе бинарного поиска. Соответсвенно, и ассимптотака такая же. МЫ ищем нужную нам ветку, куда неообходимо добавить элемент, перекрепив указатели.
+
+График для `std::map`:
+
+![capacity_size](./img/image12.png)
+
+Аналогично, ассимптотика **O(logN)**. Соображения те же самые.
+
+График для `std::multiset`:
+
+![capacity_size](./img/image13.png)
+
+Аналогично, ассимптотика **O(logN)**. Соображения те же самые. На этом контейнере особенно хорошо видна зависимость.
+
+График для `std::multimap`:
+
+![capacity_size](./img/image14.png)
+
+Аналогично, ассимптотика **O(logN)**. Соображения те же самые. На этом контейнере особенно хорошо видна зависимость.
+
   
 </details>
