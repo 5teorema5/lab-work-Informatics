@@ -616,6 +616,109 @@ int main() {
 <details>
   <summary><h3>6. Среднее время обхода всего контейнера</h3></summary>
 
+Продолжаем издеваться над контейнерами стандартной библиотеки, на этот раз будем тестировать полный обход контейнера. То есть постепенно добавляем элементы в разные типы контейнеров, на каждом этапе засекаем время полного обхода контейнера (условно, увеличиваем элементы на единицу - не сильно сложная операция, времени особо много не займёт). Ну а в конце построим график зависимости времени данной операции от размера контейнеров. Наверное, лучше для всех контейнеров сделать один график, чтобы наглядно оценить скорость роста графиков.
+
+<details>
+  <summary>"task6.cpp"</summary>
+
+```C++
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include <vector>
+#include <forward_list>
+#include <list>
+#include <set>
+#include <map>
+
+double get_time() {
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count() / 1e6;
+}
+
+int rand_uns(int min, int max) {
+    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
+    static std::default_random_engine e(seed);
+    std::uniform_int_distribution<int> d(min, max);
+    return d(e);
+}
+
+int main() {
+    std::ofstream f1("../6_1.csv", std::ios::out);
+    std::ofstream f2("../6_2.csv", std::ios::out);
+    std::ofstream f3("../6_3.csv", std::ios::out);
+    std::ofstream f4("../6_4.csv", std::ios::out);
+    std::ofstream f5("../6_5.csv", std::ios::out);
+
+    std::vector<int> v;
+    std::forward_list<int> fl;
+    std::list<int> l;
+    std::set<int> s;
+    std::map<int, int> m;
+
+    for (int i = 0; i < 1048576; i++) {
+        v.push_back(i);
+        fl.push_front(i);
+        l.push_front(i);
+        s.insert(i);
+        m.insert({i, i});
+
+        // size all containers ==
+
+        if (i % 10000 == 0) {
+            auto start = get_time();
+            for (int & k : v) {
+                k++;
+            }
+            auto finish = get_time();
+            auto time = finish - start;
+            f1 << v.size() << " " << time << "\n";
+
+            start = get_time();
+            for (int n: fl) {
+                n++;
+            }
+            finish = get_time();
+            time = finish - start;
+            f2 << i << " " << time << "\n";
+
+            start = get_time();
+            for (int n: l) {
+                n++;
+            }
+            finish = get_time();
+            time = finish - start;
+            f3 << i << " " << time << "\n";
+
+            start = get_time();
+            for (int n: s) {
+                n++;
+            }
+            finish = get_time();
+            time = finish - start;
+            f4 << s.size() << " " << time << "\n";
+
+            start = get_time();
+            for (auto &[key, value]: m) {
+                value++;
+            }
+            finish = get_time();
+            time = finish - start;
+            f5 << i << " " << time << "\n";
+        }
+    }
+
+    return 0;
+}
+```
+  
+</details>
+
+Вот, что получилось:
+
+![capacity_size](./img/image15.png)
 
   
 </details>
@@ -623,6 +726,12 @@ int main() {
 <details>
   <summary><h3>7. Среднее время доступа к произвольному элементу (random access) вектора</h3></summary>
 
+Для `std::vector` все очевидно, просто пробегаемся последовательно по его элементам. Такая сложность - **O(N)**.
 
+Для `forward_list` и `list` процесс обхода аналогичный, отличие лишь в том, что у нас нет индексации, поэтому обход происходит через указатели одного элемента на другой. Такая сложность - **O(N)**.
+
+Для `map` может быть 2 варианта обхода: dfs и bfs, которые имеют сложность **O(N)**.
+
+Так же можно заметить, что если график для `std::vector` представляет из себя более-менее прямую на всём участке графика, то график `std::map` разваливается особенно заметно.
   
 </details>
